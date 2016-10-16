@@ -54,6 +54,11 @@
 #   tuples mapping physical network names to agent's node-specific physical
 #   network interfaces. Defaults to empty list.
 #
+# [*enable_secrity_group*]
+#   (optional) Controls whether the neutron security group API is enabled in the server. It
+#   should be false when using no security groups or using the nova security group API.
+#   Defaults to undef.
+#
 # [*firewall_driver*]
 #   (optional) Firewall driver for realizing neutron security group function.
 #   Defaults to 'neutron.agent.linux.iptables_firewall.IptablesFirewallDriver'.
@@ -75,6 +80,7 @@ class neutron::agents::ml2::linuxbridge (
   $polling_interval = $::os_service_default,
   $l2_population    = $::os_service_default,
   $physical_interface_mappings = [],
+  $enable_security_group = undef,
   $firewall_driver  = 'neutron.agent.linux.iptables_firewall.IptablesFirewallDriver',
   $purge_config     = false,
 ) {
@@ -129,6 +135,12 @@ class neutron::agents::ml2::linuxbridge (
     neutron_agent_linuxbridge { 'securitygroup/firewall_driver': value => $firewall_driver }
   } else {
     neutron_agent_linuxbridge { 'securitygroup/firewall_driver': ensure => absent }
+  }
+  
+  if $enable_security_group!=undef {
+    neutron_agent_linuxbridge { 'securitygroup/enable_security_group': value => $enable_security_group }
+  } else {
+    neutron_agent_linuxbridge { 'securitygroup/enable_security_group': ensure => absent }
   }
 
   if $::neutron::params::linuxbridge_agent_package {
